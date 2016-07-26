@@ -1,0 +1,16 @@
+{
+"name": "vim",
+
+"description": "Vim is a highly configurable text editor built to enable efficient text editing.",
+
+"depend": [
+"gtk+"
+],
+
+"source" : {
+    "type": "git",
+    "path": "git@github.com:vim/vim.git"
+}
+
+
+}

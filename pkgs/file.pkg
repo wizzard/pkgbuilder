@@ -1,0 +1,13 @@
+{
+"name": "file",
+
+"description": "file test.",
+
+"depend": [],
+
+"source" : {
+    "type": "archive",
+    "path": "file-9.1.tar.gz"
+}
+
+}
