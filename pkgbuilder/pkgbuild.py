@@ -30,13 +30,25 @@ class PkgBuild(object):
         """
         return self.type
 
-    def run(self):
+    def prepare(self):
         """
-        Build the sources
+        Prepare for build
         """
         local_dir_tree.rmdir(self.build_path)
         local_dir_tree.mkdir(self.build_path)
         local_dir_tree.cd(self.build_path)
+
+    def build(self):
+        """
+        Build the sources
+        """
+        local_dir_tree.cd(self.build_path)
+
+    def install(self):
+        """
+        Install
+        """
+        pass
 
     def exist(self):
         """

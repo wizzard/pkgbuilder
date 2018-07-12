@@ -37,13 +37,27 @@ class PkgSource(object):
         """
         Update the sources
         """
-        pass
+        local_dir_tree.cd(self.src_path)
 
     def exist(self):
         """
         return TRUE if sources exist
         """
         pass
+
+    def get_tag(self):
+        """
+        return current source tree tag / version / commit id
+        or None if not implemented
+        """
+        local_dir_tree.cd(self.src_path)
+
+    def get_changelog(self, old, new):
+        """
+        return changelog between old and new tags
+        """
+        local_dir_tree.cd(self.src_path)
+
 
 
 from pkgbuilder.pkgsourcegit import PkgSourceGit

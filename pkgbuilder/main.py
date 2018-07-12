@@ -6,15 +6,18 @@ from pkgbuilder.pkgtree import PkgTree
 from pkgbuilder.conf import conf
 from pkgbuilder.pkgdb import PkgDB
 from pkgbuilder.local_dir_tree import local_dir_tree
+from pkgbuilder.pkgdb import db
 
 class App(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.db = PkgDB()
         self.pkg_tree = PkgTree()
 
     def install(self, params=None):
+        """
+        Install specified pkg(-s) and all dependencies
+        """
         if not params:
             self.logger.error("No package to install specified")
             return False
@@ -26,28 +29,68 @@ class App(object):
                 return False
 
             pkg = self.pkg_tree.get(p)
-            for dep in self.pkg_tree.get_dependencies(pkg):
+            l_order = []
+            for dep in self.pkg_tree.get_dependencies(pkg, l_order):
                 self.logger.info("Installing %s", dep)
-                dep.source.init()
-                dep.build.run()
+                dep.install()
 
             self.logger.info("Installing %s", pkg)
-            pkg.source.init()
-            pkg.build.run()
+            pkg.install()
 
         return True
 
+    def update(self, params=None):
+        """
+        Update specified package(-s) and all dependencies
+        """
+        self.logger.info("Updating")
+
+        pkg_list = []
+        for p in params:
+            pkg_list.append(self.pkg_tree.get(p))
+
+        if not pkg_list:
+            pkg_list = self.pkg_tree.get_pkg_list()
+
+        for pkg in pkg_list:
+            l_order = []
+            for dep in self.pkg_tree.get_dependencies(pkg, l_order):
+                self.logger.info("Updating %s", dep)
+                dep.update()
+
+            self.logger.info("Updating %s", pkg)
+            pkg.update()
+
+        return True
+
+
     def list(self, params=None):
+        """
+        List pkgs and all dependencies
+        """
         self.logger.info("Listing")
         self.pkg_tree.list()
 
-    def update(self, params=None):
-        self.logger.info("Updating")
-        try:
-            self.pkg_tree.update()
-        finally:
-            # Clean up
-            local_dir_tree.cd_cwd()
+    def changelog(self, params=None):
+        """
+        List changelog(-s)
+        """
+        self.logger.info("Changelog")
+        pkg_list = []
+        for p in params:
+            pkg_list.append(self.pkg_tree.get(p))
+
+        if not pkg_list:
+            pkg_list = self.pkg_tree.get_pkg_list()
+
+        for pkg in pkg_list:
+            l_order = []
+            for dep in self.pkg_tree.get_dependencies(pkg, l_order):
+                dep.changelog()
+
+            pkg.changelog()
+
+        return True
 
 
     def run(self):
@@ -104,13 +147,10 @@ class App(object):
 
         # Open Database
         try:
-            self.db.load(conf["db_path"])
+            db.load(conf["db_path"])
         except Exception as e:
             print("Failed to open database: {}!".format(conf["db_path"]))
             sys.exit(1)
-
-        # load packages from database
-        # self.pkg_tree.load_from_db(self.db)
 
         # prepare local directories
         local_dir_tree.prepare()
@@ -121,8 +161,8 @@ class App(object):
         except Exception as e:
             self.logger.error("Failed to load packages %s", e.args)
 
-        # clean obsolete directories
-        self.pkg_tree.update_db(self.db)
+        # load packages from database
+        self.pkg_tree.load_from_db()
 
         # execute specified command
         getattr(self, parser_args.action)(parser_args.params)

@@ -5,18 +5,20 @@ from pkgbuilder.command import command_exec
 class PkgBuildMeson(PkgBuild):
     type = "meson"
 
-    def run(self):
-        super().run()
-
+    def prepare(self):
+        super().prepare()
         # config
         exec_cmd = ["meson", self.src_path, self.prefix]
         exec_cmd.extend(self.flags)
-        command_exec(exec_cmd, True)
+        command_exec(exec_cmd)
 
-        # build
+    def build(self):
+        super().build()
+
         exec_cmd = ["ninja"]
-        command_exec(exec_cmd, True)
+        command_exec(exec_cmd)
 
-        # install
+    def install(self):
+        super().install()
         exec_cmd = ["ninja", "install"]
-        command_exec(exec_cmd, True)
+        command_exec(exec_cmd)

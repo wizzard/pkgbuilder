@@ -1,10 +1,11 @@
 from __future__ import print_function
 import logging
 import json
+from datetime import datetime
 from pkgbuilder.pkgsource import getPkgSource
 from pkgbuilder.pkgbuild import getPkgBuild
-from pkgbuilder.local_dir_tree import local_dir_tree
-from pkgbuilder.command import command_exec
+from pkgbuilder.pkgdb import db
+from pkgbuilder.conf import conf
 
 
 def pkg_get_name(pkg_file):
@@ -32,13 +33,18 @@ class Pkg(object):
     """
     pkg_file = None
     depends = []
-    description = None
-    name = None
+    description = ""
+    name = ""
+    installed_tag = ""
+    current_tag = ""
+    prev_tag = ""
+    installation_date = None
+    update_date = None
+
     # Souce object
     source = None
     # Build object
     build = None
-    has_pkg_file = False
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -47,7 +53,7 @@ class Pkg(object):
         """
         Print the name of the package
         """
-        return self.name
+        return "%s (installed_tag: %s, current_tag: %s)" % (self.name, self.installed_tag, self.current_tag)
 
     def load(self, pkg_file):
         """
@@ -71,6 +77,9 @@ class Pkg(object):
             finally:
                 jfile.close()
 
+        # try to get current_tag
+        self.current_tag = self.source.get_tag()
+
     def set_data(self, data):
         """
         Load and parse JSON package file
@@ -80,6 +89,16 @@ class Pkg(object):
         self.depends = list(data["depend"])
         self.source = getPkgSource(data["source"]["type"], data["name"], data["source"]["path"])
         self.build = getPkgBuild(data["build"]["type"], data["name"], data["build"]["flags"])
+
+    def load_from_db(self, pkg_db_entry):
+        self.installed_tag = pkg_db_entry[1]
+        self.installation_date = pkg_db_entry[2]
+        self.prev_tag = pkg_db_entry[4]
+        if not self.prev_tag:
+            self.prev_tag = self.installed_tag
+
+    def store_to_db(self):
+        pass
 
     def print_depends(self):
         for d in self.depends:
@@ -92,25 +111,46 @@ class Pkg(object):
         for d in self.depends:
             yield d
 
-    def init(self):
+    def install(self):
         """
-        Get the fresh copy of sources
+        Initial pkg installation
         """
-        self.source.get()
+        self.source.init()
+        self.current_tag = self.source.get_tag()
 
-    def build(self):
-        """
-        Build the package
-        """
-        local_dir_tree.cd(self.source.path)
-        exec_cmd = ["sh", "autogen.sh"]
-        command_exec(exec_cmd, True)
-        exec_cmd = ["./configure"]
-        command_exec(exec_cmd, False)
+        self.build.prepare()
+        self.build.build()
+        self.build.install()
 
-    def run(self):
+        self.installed_tag = self.current_tag
+        self.prev_tag = self.installed_tag
+        self.installation_date = datetime.now()
+        self.update_date = self.installation_date
+        db.update_pkg(self)
+
+    def update(self):
         """
-        Get, build, install
+        Update installed pkg
         """
-        self.init()
-        self.build()
+        self.source.update()
+        self.current_tag = self.source.get_tag()
+
+        if not conf.forced_install and self.current_tag == self.installed_tag:
+            self.logger.debug("Latest version already installed")
+            return
+
+        self.build.build()
+        self.build.install()
+
+        self.update_date = datetime.now()
+        self.prev_tag = self.installed_tag
+        self.installed_tag = self.current_tag
+        db.update_pkg(self)
+
+    def changelog(self):
+        """
+        display changelog
+        """
+        print("%s %s %s" % (self.name, self.prev_tag, self.installed_tag))
+        output = self.source.get_changelog(self.prev_tag, self.installed_tag)
+        print(output)

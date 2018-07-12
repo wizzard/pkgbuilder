@@ -3,13 +3,13 @@ import logging
 import os
 from pkgbuilder.pkg import Pkg
 from pkgbuilder.pkg import pkg_get_name
+from pkgbuilder.pkgdb import db
 
 class PkgTree(object):
     """
     Perform tasks on the list of packages
     """
     pkgs_dir = None
-    l_order = []
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -58,66 +58,56 @@ class PkgTree(object):
                     except (IOError, OSError, ValueError, KeyError) as err:
                         self.logger.error("Failed to load %s package file: %s", fname, err.args)
 
-                    pkg.has_pkg_file = True
-
-    def load_from_db(self, db):
+    def load_from_db(self):
         """
         Load the list of packages from database
         """
         for pkg_db_entry in db.get_pkg_list():
-            self.logger.debug("Loading package: " + pkg_db_entry[0])
-            pkg = Pkg()
-            pkg.name = pkg_db_entry[0]
-            self.pkgdict[pkg_db_entry[0]] = pkg
+            pkg_name = pkg_db_entry[0]
+            pkg = self.get(pkg_name)
+            if pkg is None:
+                self.logger.debug("DB package not found: " + pkg_name)
+                continue
 
-    def update_db(self, db):
-        """
-        Load the list of packages from database
-        """
-        for pkg in self.pkgdict.values():
-            if pkg.has_pkg_file:
-                db.update_pkg(pkg)
-            else:
-                db.delete_pkg(pkg)
+            self.logger.debug("Loading package: " + pkg_name)
+            pkg.load_from_db(pkg_db_entry)
 
-    def update(self):
+    def get_dependencies(self, pkg, l_order):
         """
-        Update packages
+        generator, return dependencies for pkg
         """
-        for pkg in self.pkgdict.values():
-            if pkg.has_pkg_file:
-                pkg.run()
-
-    def get_dependencies(self, pkg):
         for d in pkg.list_depends():
             p1 = self.pkgdict[d]
-            if p1 not in self.l_order:
-                self.l_order.append(p1)
+            if p1 not in l_order:
+                l_order.append(p1)
                 yield p1
-                self.get_dependencies(p1)
-        #if pkg not in self.l_order:
-        #    self.l_order.append(pkg)
-        #    yield pkg
+                self.get_dependencies(p1, l_order)
+
+    def get_pkg_list(self):
+        """
+        generator, return list of all pkgs
+        """
+        l_order = []
+        for pkg in self.pkgdict.values():
+            for a in self.get_dependencies(pkg, l_order):
+                yield a
+            if pkg not in l_order:
+                l_order.append(pkg)
+                yield pkg
 
     def list_pkg(self, pkg, spaces):
-        if pkg.has_pkg_file:
-            for d in pkg.list_depends():
-                print("{}{}".format(''.join(' ' * spaces), d))
-                spaces = spaces + 2
-                self.list_pkg(self.pkgdict[d], spaces)
-
-    def list1(self):
         """
-        Print pkg list
+        print helper function
         """
-        for pkg in self.pkgdict.values():
-            print("{}".format(pkg.name))
-            self.list_pkg(pkg, 2)
+        for d in pkg.list_depends():
+            dpkg = self.pkgdict[d]
+            print("{}{}".format(''.join(' ' * spaces), dpkg))
+            self.list_pkg(dpkg, spaces + 2)
 
     def list(self):
         """
         Print pkg list
         """
         for pkg in self.pkgdict.values():
-            for a in self.get_dependencies(pkg):
-                print(a.name)
+            print(pkg)
+            self.list_pkg(pkg, 2)

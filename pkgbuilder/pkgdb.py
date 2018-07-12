@@ -1,5 +1,6 @@
 import sqlite3
 import logging
+from pkgbuilder.conf import conf
 
 class PkgDB(object):
     conn = None
@@ -11,9 +12,14 @@ class PkgDB(object):
         self.conn = sqlite3.connect(path)
 
     def get_pkg_list(self):
+        q = "SELECT name,installed_tag,date_install,date_install,prev_tag FROM pkgs"
+        self.logger.debug(q)
+        if conf.pretend:
+            return
+
         try:
             c = self.conn.cursor()
-            c.execute("SELECT * FROM pkgs")
+            c.execute(q)
 
             for row in c.fetchall():
                 yield row
@@ -21,23 +27,32 @@ class PkgDB(object):
             raise
 
     def update_pkg(self, pkg):
+        q = "INSERT OR REPLACE INTO pkgs(name, installed_tag, date_install, date_update, prev_tag) VALUES('{}', '{}', '{}', '{}', '{}')".format(pkg.name, pkg.installed_tag, pkg.installation_date, pkg.update_date, pkg.prev_tag)
+        self.logger.debug("Updating " + pkg.name + " QUERY: " + q)
+        if conf.pretend:
+            return
+
         try:
             c = self.conn.cursor()
-            str = "INSERT OR IGNORE INTO pkgs(name) VALUES('{}')".format(pkg.name)
-            self.logger.debug("Updating " + pkg.name + " QUERY: " + str)
-            c.execute(str)
+            c.execute(q)
         except:
             raise
         else:
             self.conn.commit()
 
     def delete_pkg(self, pkg):
+        q = "DELETE FROM pkgs WHERE name='{}'".format(pkg.name)
+        self.logger.debug(q)
+        if conf.pretend:
+            return
+
         try:
             c = self.conn.cursor()
-            str = "DELETE FROM pkgs WHERE name='{}'".format(pkg.name)
-            self.logger.debug("Updating " + pkg.name + " QUERY: " + str)
-            c.execute(str)
+            c.execute(q)
         except:
             raise
         else:
             self.conn.commit()
+
+
+db = PkgDB()
