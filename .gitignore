@@ -34,6 +34,7 @@
 
 work
 root
+pkgbuilder.sqlite
 
 *.pyc
 *.swp
