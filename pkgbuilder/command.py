@@ -1,8 +1,8 @@
 from __future__ import print_function
 import subprocess
 import logging
-import os
 from pkgbuilder.conf import conf
+
 
 def command_exec(cmd, ignore_error):
     logger = logging.getLogger(__name__)
@@ -10,7 +10,13 @@ def command_exec(cmd, ignore_error):
     if conf.pretend:
         return
     try:
-        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        # subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1)
+        for line in iter(p.stdout.readline, b''):
+            print(line)
+        p.stdout.close()
+        p.wait()
+
     except subprocess.CalledProcessError as e:
         logger.debug("Error: %s", e.output)
         if ignore_error:

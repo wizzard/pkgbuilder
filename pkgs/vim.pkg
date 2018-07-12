@@ -4,13 +4,20 @@
 "description": "Vim is a highly configurable text editor built to enable efficient text editing.",
 
 "depend": [
-"gtk+"
+    "gtk"
 ],
 
-"source" : {
+"source": {
     "type": "git",
     "path": "git@github.com:vim/vim.git"
-}
+},
 
+"build": {
+    "type": "meson",
+    "flags": []
+},
+
+"post-install": [
+]
 
 }

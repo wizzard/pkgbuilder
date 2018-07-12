@@ -1,3 +1,7 @@
+import os
+from pkgbuilder.local_dir_tree import local_dir_tree
+
+
 class PkgSource(object):
     # remote path of source
     url = None
@@ -6,11 +10,15 @@ class PkgSource(object):
     # type of source
     type = None
     # local path to extracted source
-    path = None
+    src_path = None
+    # local path to pkg directory
+    pkg_path = None
 
     def __init__(self, name, url):
         self.url = url
         self.name = name
+        self.pkg_path = os.path.join(local_dir_tree.work_dir, self.name)
+        self.src_path = os.path.join(self.pkg_path, "src")
 
     def __str__(self):
         """
@@ -18,11 +26,12 @@ class PkgSource(object):
         """
         return self.type
 
-    def get(self):
+    def init(self):
         """
         Get the sources
         """
-        pass
+        local_dir_tree.rmdir(self.pkg_path)
+        local_dir_tree.mkdir(self.pkg_path)
 
     def update(self):
         """
@@ -30,10 +39,19 @@ class PkgSource(object):
         """
         pass
 
+    def exist(self):
+        """
+        return TRUE if sources exist
+        """
+        pass
+
+
 from pkgbuilder.pkgsourcegit import PkgSourceGit
 from pkgbuilder.pkgsourcearchieve import PkgSourceArchieve
 
+
 TypeType = type(type)
+
 
 def getPkgSource(source_type, name, url):
     pkgSourceClasses = [j for (_, j) in globals().items() if isinstance(j, TypeType) and issubclass(j, PkgSource)]

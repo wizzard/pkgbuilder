@@ -1,0 +1,20 @@
+{
+"name": "atk",
+
+"description": "The interface definitions of accessibility infrastructure",
+
+"depend": [
+    "glib"
+],
+
+"source": {
+    "type": "git",
+    "path": "git@gitlab.gnome.org:GNOME/atk.git"
+},
+
+"build": {
+    "type": "meson",
+    "flags": []
+}
+
+}

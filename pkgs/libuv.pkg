@@ -1,0 +1,18 @@
+{
+"name": "libuv",
+
+"description": "Cross-platform asynchronous I/O",
+
+"depend": [],
+
+"source": {
+    "type": "git",
+    "path": "git@github.com:libuv/libuv.git"
+},
+
+"build": {
+    "type": "autotools",
+    "flags": []
+}
+
+}

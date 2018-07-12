@@ -1,13 +1,16 @@
 import os
 import errno
 import logging
+from shutil import rmtree
 from pkgbuilder.conf import conf
+
 
 class LocalDirTree(object):
     """
     Perform local directory tasks
     """
-    work_sources_dir = None
+    work_dir = None
+    root_dir = None
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -29,6 +32,14 @@ class LocalDirTree(object):
             else:
                 raise
 
+    def rmdir(self, dir_path):
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug("rmtree %s", dir_path)
+        if conf.pretend:
+            return
+        rmtree(dir_path, True)
+
+
     def cd(self, path):
         self.logger.debug("Changing dir: %s", path)
         if conf.pretend:
@@ -43,7 +54,11 @@ class LocalDirTree(object):
         self.cd(self.cwd)
 
     def prepare(self):
-        self.work_sources_dir = os.path.join(conf["work_dir_path"], conf["work_sources_dir"])
-        self.mkdir(self.work_sources_dir)
+        self.work_dir = conf["work_dir"]
+        self.mkdir(self.work_dir)
+        self.root_dir = conf["root_dir"]
+        self.mkdir(self.root_dir)
+
+
 
 local_dir_tree = LocalDirTree()

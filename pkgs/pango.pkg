@@ -1,0 +1,20 @@
+{
+"name": "pango",
+
+"description": "Pango is a library for layout and rendering of text, with an emphasis on internationalization.",
+
+"depend": [
+    "cairo"
+],
+
+"source": {
+    "type": "git",
+    "path": "git@gitlab.gnome.org:GNOME/pango.git"
+},
+
+"build": {
+    "type": "meson",
+    "flags": []
+}
+
+}

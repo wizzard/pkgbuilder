@@ -33,5 +33,7 @@
 *.su
 
 work
+root
 
 *.pyc
+*.swp

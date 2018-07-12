@@ -5,9 +5,23 @@
 
 "depend": [],
 
-"source" : {
+"source": {
     "type": "git",
-    "path": "git://git.gnome.org/glib"
+    "path": "git@gitlab.gnome.org:GNOME/glib.git"
+},
+
+"build": {
+    "type": "meson",
+    "flags": [
+        "-Dwayland-backend=false",
+        "-Dbuild-tests=false",
+        "--buildtype=debugoptimized",
+        "-Dmedia=none",
+        "-Dvulkan=yes",
+        "-Dcloudproviders=false",
+        "-Ddocumentation=false",
+        "-Dselinux=false"
+    ]
 }
 
 }

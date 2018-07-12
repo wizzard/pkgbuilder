@@ -1,0 +1,20 @@
+{
+"name": "gdk-pixbuf",
+
+"description": "An image loading library",
+
+"depend": [
+    "glib"
+],
+
+"source": {
+    "type": "git",
+    "path": "git@gitlab.gnome.org:GNOME/gdk-pixbuf.git"
+},
+
+"build": {
+    "type": "meson",
+    "flags": []
+}
+
+}

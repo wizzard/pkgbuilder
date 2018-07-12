@@ -1,0 +1,20 @@
+{
+"name": "cairo",
+
+"description": "Cairo is a 2D graphics library with support for multiple output devices.",
+
+"depend": [
+    "glib"
+],
+
+"source": {
+    "type": "git",
+    "path": "git@gitlab.com:cairo/cairo-demos.git"
+},
+
+"build": {
+    "type": "autotools",
+    "flags": []
+}
+
+}

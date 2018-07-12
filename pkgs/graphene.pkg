@@ -1,0 +1,20 @@
+{
+"name": "graphene",
+
+"description": "A thin layer of graphic data types",
+
+"depend": [
+    "glib"
+],
+
+"source": {
+    "type": "git",
+    "path": "git@github.com:ebassi/graphene.git"
+},
+
+"build": {
+    "type": "meson",
+    "flags": []
+}
+
+}

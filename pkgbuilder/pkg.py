@@ -2,6 +2,7 @@ from __future__ import print_function
 import logging
 import json
 from pkgbuilder.pkgsource import getPkgSource
+from pkgbuilder.pkgbuild import getPkgBuild
 from pkgbuilder.local_dir_tree import local_dir_tree
 from pkgbuilder.command import command_exec
 
@@ -30,11 +31,13 @@ class Pkg(object):
     Package object
     """
     pkg_file = None
-    depend = []
+    depends = []
     description = None
     name = None
     # Souce object
     source = None
+    # Build object
+    build = None
     has_pkg_file = False
 
     def __init__(self):
@@ -74,18 +77,19 @@ class Pkg(object):
         """
         self.name = data["name"]
         self.description = data["description"]
-        self.depend = list(data["depend"])
+        self.depends = list(data["depend"])
         self.source = getPkgSource(data["source"]["type"], data["name"], data["source"]["path"])
+        self.build = getPkgBuild(data["build"]["type"], data["name"], data["build"]["flags"])
 
     def print_depends(self):
-        for d in self.depend:
+        for d in self.depends:
             print(d)
 
     def list_depends(self):
         """
         Yield the list of dependencies
         """
-        for d in self.depend:
+        for d in self.depends:
             yield d
 
     def init(self):
