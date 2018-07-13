@@ -13,14 +13,10 @@
 "build": {
     "type": "meson",
     "flags": [
-        "-Dwayland-backend=false",
-        "-Dbuild-tests=false",
-        "--buildtype=debugoptimized",
-        "-Dmedia=none",
-        "-Dvulkan=yes",
-        "-Dcloudproviders=false",
-        "-Ddocumentation=false",
-        "-Dselinux=false"
+        "-Dbuildtype=release",
+        "-Dselinux=false",
+        "-Dman=false",
+        "-Dgtk_doc=false"
     ]
 }
 

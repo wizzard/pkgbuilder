@@ -18,7 +18,20 @@
 
 "build": {
     "type": "meson",
-    "flags": []
+    "flags": [
+        "-Dwayland-backend=false",
+        "-Dbuild-tests=false",
+        "-Dbuildtype=release",
+        "-Dmedia=none",
+        "-Dvulkan=no",
+        "-Dcloudproviders=false",
+        "-Ddocumentation=false",
+        "-Dselinux=false",
+        "-Ddemos=false",
+        "-Dbuild-examples=false",
+        "-Dcolord=no",
+        "-Dintrospection=false"
+    ]
 }
 
 }

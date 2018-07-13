@@ -22,6 +22,8 @@ class PkgBuildAutotools(PkgBuild):
 
     def build(self):
         super().build()
+        exec_cmd = ["make", "clean"]
+        command_exec(exec_cmd)
         exec_cmd = ["make"]
         command_exec(exec_cmd)
 

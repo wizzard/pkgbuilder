@@ -1,9 +1,11 @@
 from __future__ import print_function
 import logging
 import os
+import sys
 from pkgbuilder.pkg import Pkg
 from pkgbuilder.pkg import pkg_get_name
 from pkgbuilder.pkgdb import db
+
 
 class PkgTree(object):
     """
@@ -43,6 +45,7 @@ class PkgTree(object):
                         pkg_name = pkg_get_name(fname)
                     except (IOError, OSError, ValueError, KeyError) as err:
                         self.logger.error("Failed to load %s package file: %s", fname, err.args)
+                        sys.exit(1)
 
                     self.logger.debug("Loading %s", pkg_name)
                     # see if we have loaded that pkg from database
@@ -57,6 +60,7 @@ class PkgTree(object):
                         pkg.load(fname)
                     except (IOError, OSError, ValueError, KeyError) as err:
                         self.logger.error("Failed to load %s package file: %s", fname, err.args)
+                        sys.exit(1)
 
     def load_from_db(self):
         """

@@ -66,19 +66,23 @@ class Pkg(object):
         try:
             jfile = open(pkg_file)
         except (IOError, OSError) as err:
-            print(err.args)
+            print("%s %s" % ("1", err.args))
             raise
         else:
             try:
                 data = json.load(jfile)
                 self.set_data(data)
             except ValueError as err:
+                print("%s %s" % ("2", err.args))
                 raise
             finally:
                 jfile.close()
 
         # try to get current_tag
-        self.current_tag = self.source.get_tag()
+        try:
+            self.current_tag = self.source.get_tag()
+        except (IOError, OSError) as err:
+            pass
 
     def set_data(self, data):
         """
@@ -115,7 +119,13 @@ class Pkg(object):
         """
         Initial pkg installation
         """
-        self.source.init()
+
+        if self.current_tag:
+            self.logger.debug("Source tree is already fetched")
+            self.source.update()
+        else:
+            self.source.init()
+
         self.current_tag = self.source.get_tag()
 
         self.build.prepare()

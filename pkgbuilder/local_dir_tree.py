@@ -60,5 +60,4 @@ class LocalDirTree(object):
         self.mkdir(self.root_dir)
 
 
-
 local_dir_tree = LocalDirTree()

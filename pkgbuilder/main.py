@@ -1,5 +1,6 @@
 from __future__ import print_function
 import sys
+import os
 import logging
 import argparse
 from pkgbuilder.pkgtree import PkgTree
@@ -13,6 +14,12 @@ class App(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.pkg_tree = PkgTree()
+
+    def prep_env(self):
+        os.environ["PATH"] = conf["root_dir"] + "/bin:" + os.environ["PATH"]
+        os.environ["LD_LIBRARY_PATH"] = conf["root_dir"] + "/lib:" + conf["root_dir"] + "/lib64:" + os.environ["LD_LIBRARY_PATH"]
+        os.environ["PKG_CONFIG_PATH"] = conf["root_dir"] + "/lib/pkgconfig:" + conf["root_dir"] + "/lib64/pkgconfig:" + os.environ["PKG_CONFIG_PATH"]
+
 
     def install(self, params=None):
         """
@@ -163,6 +170,8 @@ class App(object):
 
         # load packages from database
         self.pkg_tree.load_from_db()
+
+        self.prep_env()
 
         # execute specified command
         getattr(self, parser_args.action)(parser_args.params)

@@ -14,7 +14,8 @@ class PkgBuildMeson(PkgBuild):
 
     def build(self):
         super().build()
-
+        exec_cmd = ["ninja", "clean"]
+        command_exec(exec_cmd)
         exec_cmd = ["ninja"]
         command_exec(exec_cmd)
 

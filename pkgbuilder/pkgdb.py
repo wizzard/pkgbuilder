@@ -2,6 +2,7 @@ import sqlite3
 import logging
 from pkgbuilder.conf import conf
 
+
 class PkgDB(object):
     conn = None
 
@@ -9,7 +10,18 @@ class PkgDB(object):
         self.logger = logging.getLogger(__name__)
 
     def load(self, path):
+        q = "CREATE TABLE IF NOT EXISTS `pkgs` (`name` TEXT NOT NULL UNIQUE, `date_install` TEXT, `date_update` TEXT, `installed_tag` TEXT, `prev_tag` TEXT, PRIMARY KEY(`name`));"
+        if conf.pretend:
+            return
+
         self.conn = sqlite3.connect(path)
+        try:
+            c = self.conn.cursor()
+            c.execute(q)
+        except:
+            raise
+        else:
+            self.conn.commit()
 
     def get_pkg_list(self):
         q = "SELECT name,installed_tag,date_install,date_install,prev_tag FROM pkgs"
